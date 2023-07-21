@@ -1,5 +1,5 @@
-import { redirect, type ActionArgs, type ActionFunction, type LinksFunction, type MetaFunction, type LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { redirect, type ActionArgs, type ActionFunction, type LinksFunction, type MetaFunction, type LoaderFunction, json } from "@remix-run/node";
+import { useCatch, useLoaderData } from "@remix-run/react";
 import { getNotes, saveNotes } from "~/api/infra/persistence/notes";
 import NewNote, { links as newNoteLinks } from "~/components/NewNote";
 import NoteList, { links as noteListLinks } from "~/components/NoteList";
@@ -17,6 +17,9 @@ export const meta: MetaFunction = () => {
 
 export const loader: LoaderFunction = async () => {
     const notes: Note[] = await getNotes();
+    if (!notes || notes?.length === 0) {
+        throw json({ message: 'Notes Not Found' }, { status: 404 });
+    }
     return notes;
 }
 
@@ -41,13 +44,25 @@ export const action: ActionFunction = async ({ request }: ActionArgs) => {
     return redirect('/notes');
 }
 
+export const CatchBoundary = () => {
+    const catchResponse = useCatch();
+    const message = catchResponse.data?.message || 'Data Not Found';
+
+    return (
+        <main>
+            <NewNote />
+            <p className="info-message">{message}</p>
+        </main>
+    )
+}
+
 export default function NotePage() {
     const notes: Note[] = useLoaderData();
 
     return (
         <main>
             <NewNote />
-            <NoteList notes={ notes } />
+            <NoteList notes={notes} />
         </main>
     )
 }
