@@ -10,7 +10,7 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => {
   return {
-    title: "New Remix App",
+    title: "Home",
     name: "description", content: "Welcome to Remix!"
   }
 };
